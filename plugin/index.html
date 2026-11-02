@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chinminator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Chinminator <span class="tag">Z-Image · quality</span></h2>
+
+    <div id="server-status" class="status">Проверка сервера…</div>
+
+    <section>
+      <h3>Режим потока</h3>
+      <label class="radio">
+        <input type="radio" name="mode" value="auto" checked />
+        Авто — сплошной поток (решает анализатор)
+      </label>
+      <label class="radio">
+        <input type="radio" name="mode" value="forced" />
+        Принудительно — править каждое фото
+      </label>
+    </section>
+
+    <section>
+      <h3>Чувствительность</h3>
+      <label>Порог подбородка <span id="v-thresh">0.12</span>
+        <input type="range" id="threshold" min="0.05" max="0.30" step="0.01" value="0.12" />
+      </label>
+      <label>Сила коррекции <span id="v-strength">0.55</span>
+        <input type="range" id="strength" min="0.30" max="0.75" step="0.05" value="0.55" />
+      </label>
+      <label><input type="checkbox" id="sidebyside" /> Результат рядом с оригиналом</label>
+      <label><input type="checkbox" id="batch-open" /> Пакет: все открытые документы</label>
+    </section>
+
+    <div class="actions">
+      <button id="btn-analyze" class="secondary">Предпросмотр анализа</button>
+      <button id="btn-apply" class="primary">Применить</button>
+    </div>
+
+    <div id="preview-box" class="hidden">
+      <h3>Анализ</h3>
+      <img id="preview-img" alt="analysis preview" />
+      <pre id="metrics"></pre>
+    </div>
+
+    <div id="log" class="log"></div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
