@@ -1,0 +1,68 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "_meta": {"title": "Input Image"},
+    "inputs": {"image": "dc_input.png"}
+  },
+  "2": {
+    "class_type": "LoadImageMask",
+    "_meta": {"title": "Double Chin Mask"},
+    "inputs": {"image": "dc_mask.png", "channel": "red"}
+  },
+  "3": {
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {"title": "Z-Image-Turbo Q8 (Tongzean)"},
+    "inputs": {"unet_name": "z-image-turbo-Q8.gguf"}
+  },
+  "4": {
+    "class_type": "CLIPLoader",
+    "_meta": {"title": "Text Encoder"},
+    "inputs": {"clip_name": "qwen3-4b-zimage.safetensors", "type": "zimage"}
+  },
+  "5": {
+    "class_type": "VAELoader",
+    "_meta": {"title": "VAE"},
+    "inputs": {"vae_name": "ae.safetensors"}
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {"title": "Positive Prompt"},
+    "inputs": {"text": "Remove the double chin, smooth and slim the under-jaw area, keep identity unchanged", "clip": ["4", 0]}
+  },
+  "7": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {"title": "Negative Prompt"},
+    "inputs": {"text": "blurry skin, changed identity, deformed jaw, artifacts", "clip": ["4", 0]}
+  },
+  "8": {
+    "class_type": "VAEEncodeForInpaint",
+    "_meta": {"title": "Inpaint Encode"},
+    "inputs": {"pixels": ["1", 0], "mask": ["2", 0], "vae": ["5", 0], "grow_mask_by": 12}
+  },
+  "9": {
+    "class_type": "KSampler",
+    "_meta": {"title": "Z-Image Quality Sampler (8 steps, cfg 2.0)"},
+    "inputs": {
+      "model": ["3", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["8", 0],
+      "seed": 42,
+      "steps": 8,
+      "cfg": 2.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.55
+    }
+  },
+  "10": {
+    "class_type": "VAEDecode",
+    "_meta": {"title": "Decode"},
+    "inputs": {"samples": ["9", 0], "vae": ["5", 0]}
+  },
+  "11": {
+    "class_type": "SaveImage",
+    "_meta": {"title": "Result"},
+    "inputs": {"images": ["10", 0], "filename_prefix": "doublechin/result"}
+  }
+}
