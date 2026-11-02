@@ -28,17 +28,21 @@ MODEL_DIR = os.environ.get(
 MODEL_PATH = os.path.join(MODEL_DIR, "face_landmarker.task")
 
 # Индексы FaceMesh (канонические, одинаковы в solutions и tasks)
-IDX_CHIN = 15                  # кончик подбородка
-IDX_JAW_LEFT = 172             # левый угол линии челюсти
-IDX_JAW_RIGHT = 397            # правый угол линии челюсти
+IDX_CHIN = 152                 # кончик подбородка (15 — это нижняя губа)
+IDX_JAW_LEFT = 172             # левый (в кадре) угол линии челюсти
+IDX_JAW_RIGHT = 397            # правый (в кадре) угол линии челюсти
 IDX_CHEEK_LEFT = 234           # левая граница овала лица
 IDX_CHEEK_RIGHT = 454          # правая граница овала лица
-IDX_EYE_LEFT = 263
-IDX_EYE_RIGHT = 133
-# Дуга нижнего контура лица между углами челюсти через подбородок
-SUBMENTAL_ARC = [172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182,
-                 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193,
-                 194, 195, 196, 197, 198, 200, 425]
+# Внешние уголки глаз: 33 — левый в кадре, 263 — правый в кадре.
+# (Раньше было 263/133 — вектор шёл справа налево, roll получался ≈180°,
+#  и анализ геометрии переворачивал лицо вверх ногами.)
+IDX_EYE_LEFT = 33
+IDX_EYE_RIGHT = 263
+# Дуга нижнего контура лица (face oval) от левого угла челюсти через
+# подбородок к правому, по порядку. Прежний список 172..200 содержал точки
+# губ, носа и щёк, а не контур челюсти.
+SUBMENTAL_ARC = [172, 136, 150, 149, 176, 148, 152, 377, 400, 378, 379,
+                 365, 397]
 
 
 @dataclass
@@ -103,12 +107,9 @@ def _detect_landmarks(bgr: np.ndarray) -> list[np.ndarray]:
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         mimg = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
         res = _landmarker.detect(mimg)
-        out = []
-        for lms in res.face_landmarks:
-            pts = np.array([(lm.x * bgr.shape[1], lm.y * bgr.shape[0])
-                            for lm in lms], dtype=np.float32)
-            out.append(pts)
-        return out
+        scale = np.array([bgr.shape[1], bgr.shape[0]], dtype=np.float32)
+        return [np.array([(lm.x, lm.y) for lm in lms], dtype=np.float32) * scale
+                for lms in res.face_landmarks]
 
     # ---- путь 2: legacy solutions (mediapipe <= 0.10) ----
     try:

@@ -30,8 +30,9 @@ def load(path: Path) -> np.ndarray | None:
 
 
 def save(path: Path, img: np.ndarray) -> None:
-    ok, buf = cv2.imencode(path.suffix if path.suffix != ".jpg" else ".jpg", img,
-                           [cv2.IMWRITE_JPEG_QUALITY, 95])
+    ext = path.suffix.lower() or ".png"
+    flags = [cv2.IMWRITE_JPEG_QUALITY, 95] if ext in (".jpg", ".jpeg") else []
+    ok, buf = cv2.imencode(ext, img, flags)
     if not ok:
         ok, buf = cv2.imencode(".png", img)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -66,30 +67,30 @@ def main() -> int:
             print(f"[{i}/{len(files)}] {f.name}: НЕ ЧИТАЕТСЯ"); failed += 1
             continue
         try:
-            res = process_image(img, mode=("forced" if args.mode == "forced" else "auto"),
-                                thresholds=DEFAULT_THRESHOLDS,
-                                quality=None if args.dry_run else QUALITY,
-                                side_by_side=args.sidebyside)
+            res = process_image(img, mode=args.mode,
+                                thresholds=DEFAULT_THRESHOLDS, quality=QUALITY,
+                                side_by_side=args.sidebyside,
+                                analyze_only=args.dry_run)
         except RuntimeError as e:
-            # нет Z-Image бэкенда — при dry-run не критично
-            if args.dry_run:
-                res = process_image(img, mode=args.mode,
-                                    thresholds=DEFAULT_THRESHOLDS, quality=None)
-            else:
-                print(f"[{i}/{len(files)}] {f.name}: ОШИБКА РЕДАКТИРОВАНИЯ: {e}")
-                failed += 1
-                continue
+            print(f"[{i}/{len(files)}] {f.name}: ОШИБКА РЕДАКТИРОВАНИЯ: {e}")
+            failed += 1
+            continue
 
-        out_file = outp if inp.is_file() else outp / f.name
-        if res.edited and res.image is not None:
+        # сохраняем структуру подпапок, иначе одноимённые файлы затирают друг друга
+        out_file = outp if inp.is_file() else outp / f.relative_to(inp)
+        if args.dry_run:
+            tag = ("WOULD EDIT sev=%s" % res.decision.get("severity")
+                   if res.decision.get("should_edit")
+                   else f"SKIP ({res.skipped_reason or 'no edit'})")
+            skipped += 0 if res.decision.get("should_edit") else 1
+            edited += 1 if res.decision.get("should_edit") else 0
+        elif res.edited and res.image is not None:
             save(out_file.with_suffix(".png" if args.sidebyside else out_file.suffix),
                  res.image)
             edited += 1
             tag = f"EDIT sev={res.decision.get('severity')}"
         else:
-            if not args.dry_run and inp.is_file():
-                pass
-            elif not args.dry_run:
+            if not inp.is_file():
                 save(out_file, img)          # в поток «как есть»
             skipped += 1
             tag = f"SKIP ({res.skipped_reason or 'no edit'})"
