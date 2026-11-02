@@ -59,8 +59,13 @@ def analyze(bgr: np.ndarray, face: Face) -> Geometry:
     # с концевыми точками в углах челюсти и контрольной точкой чуть выше
     # подбородка. У лица без второго подбородка реальный контур лежит НА этой
     # дуге или ВЫШЕ неё; провисание вниз за её пределы = мягкие ткани.
-    ctrl = np.array([(jaw_l[0] + jaw_r[0]) / 2.0,
-                     chin[1] - 0.10 * fh], dtype=np.float64)
+    # Контрольная точка подобрана так, чтобы кривая проходила через уровень
+    # костного подбородка при t=0.5: B(0.5) = 0.25*jl + 0.5*ctrl + 0.25*jr.
+    # (Раньше ctrl ставился у подбородка, и вершина кривой оказывалась на
+    #  полпути к углам челюсти — почти любое лицо «провисало» ниже эталона.)
+    chin_ref = np.array([chin[0], chin[1]], dtype=np.float64)
+    ctrl = 2.0 * chin_ref - 0.5 * (np.asarray(jaw_l, np.float64) +
+                                   np.asarray(jaw_r, np.float64))
 
     # Для каждой точки дуги — signed vertical distance ниже соответствующей
     # точки эталонной ломаной (в системе, повёрнутой против roll головы).
@@ -68,16 +73,11 @@ def analyze(bgr: np.ndarray, face: Face) -> Geometry:
     arc_r = rot(arc)
     jl_r, jr_r, ct_r = rot(jaw_l)[0], rot(jaw_r)[0], rot(ctrl)[0]
 
-    below = []
-    n = len(arc_r)
-    for i, p in enumerate(arc_r):
-        t = i / (n - 1)
-        mt = 1.0 - t
-        q = (mt * mt) * jl_r + 2 * mt * t * ct_r + (t * t) * jr_r  # bezier
-        d = p[1] - q[1]          # >0 ⇒ точка НИЖЕ эталона (y вниз)
-        if d > 0:
-            below.append(d)
-    submental_ratio = (float(np.mean(below)) / fh) if below else 0.0
+    t = np.linspace(0.0, 1.0, len(arc_r))[:, None]
+    ref = ((1 - t) ** 2) * jl_r + 2 * (1 - t) * t * ct_r + (t ** 2) * jr_r
+    d = arc_r[:, 1] - ref[:, 1]          # >0 ⇒ точка НИЖЕ эталона (y вниз)
+    below = d[d > 0]
+    submental_ratio = float(below.mean()) / fh if below.size else 0.0
 
     # ---------- 2. jaw_collar_gap ----------
     lowest_arc_y = float(arc[:, 1].max())
@@ -166,8 +166,11 @@ def _detect_collar_line(bgr: np.ndarray, face: Face) -> float:
     x1, y1, x2, y2 = face.bbox
     chin_y = face.landmarks[IDX_CHIN][1]
     start = int(min(max(chin_y + 0.15 * face.face_h, y1), y2 - 2))
-    strip = cv2.cvtColor(bgr[start:y2, x1:x2], cv2.COLOR_BGR2GRAY)
-    if strip.size == 0 or strip.shape[0] < 4:
+    region = bgr[start:y2, x1:x2]
+    if region.size == 0 or region.shape[0] < 4:
+        return float(y2)
+    strip = cv2.cvtColor(region, cv2.COLOR_BGR2GRAY)
+    if strip.shape[0] < 4:
         return float(y2)
     grad = np.abs(cv2.Sobel(strip, cv2.CV_32F, 0, 1, ksize=3)).mean(axis=1)
     thr = grad.mean() + 1.5 * grad.std()
@@ -178,8 +181,11 @@ def _detect_collar_line(bgr: np.ndarray, face: Face) -> float:
 
 
 def _shadow_depth(bgr: np.ndarray, pts: np.ndarray, fh: float) -> float:
-    """Контраст L-канала LAB: средняя яркость тени под подбородком vs щека."""
-    lab = cv2.cvtColor(bgr, cv2.COLOR_BGR2LAB).astype(np.float32) / 255.0
+    """Контраст L-канала LAB: средняя яркость тени под подбородком vs щека.
+
+    В LAB переводятся только три маленьких патча, а не весь кадр
+    (на 24-Мп фото это экономит ~100 МБ памяти и сотни миллисекунд)."""
+    h, w = bgr.shape[:2]
     chin = pts[IDX_CHIN]
     cheek_l = pts[50]     # левая щека
     cheek_r = pts[280]    # правая щека
@@ -188,12 +194,17 @@ def _shadow_depth(bgr: np.ndarray, pts: np.ndarray, fh: float) -> float:
     def patch_mean(cx: float, cy: float) -> float:
         x0, x1i = int(cx - r), int(cx + r)
         y0, y1i = int(cy - r), int(cy + r)
-        if x0 < 0 or y0 < 0:
-            return float("nan")
-        return float(lab[y0:y1i, x0:x1i, 0].mean())
+        if x0 < 0 or y0 < 0 or x1i > w or y1i > h:
+            return float("nan")          # патч вылез за кадр
+        patch = cv2.cvtColor(bgr[y0:y1i, x0:x1i], cv2.COLOR_BGR2LAB)
+        return float(patch[..., 0].mean()) / 255.0
 
     shadow = patch_mean(chin[0], chin[1] + 0.28 * fh)
-    skin = np.nanmean([patch_mean(*cheek_l), patch_mean(*cheek_r)])
-    if np.isnan(shadow) or np.isnan(skin) or skin <= 1e-3:
+    cheeks = [v for v in (patch_mean(*cheek_l), patch_mean(*cheek_r))
+              if not np.isnan(v)]
+    if np.isnan(shadow) or not cheeks:
+        return 0.0
+    skin = float(np.mean(cheeks))
+    if skin <= 1e-3:
         return 0.0
     return float(np.clip((skin - shadow) / skin, 0.0, 1.0))
