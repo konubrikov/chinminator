@@ -1,7 +1,10 @@
 __pycache__/
 *.pyc
 .venv/
-server/models/
 server/comfyui_user/
+server/out/
+dist/
+vendor/
 .DS_Store
 Thumbs.db
+# face_landmarker.task (~3.6 МБ) намеренно в репозитории — нужен шагу 1 из коробки

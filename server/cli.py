@@ -39,7 +39,7 @@ def save(path: Path, img: np.ndarray) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Double Chin Corrector CLI")
+    ap = argparse.ArgumentParser(description="Chinminator CLI")
     ap.add_argument("input", help="файл или папка с фотографиями")
     ap.add_argument("output", help="файл или папка для результатов")
     ap.add_argument("--mode", choices=["auto", "forced"], default="auto",

@@ -1,4 +1,4 @@
-/* Double Chin Fix — логика UXP-панели Photoshop.
+/* Chinminator — логика UXP-панели Photoshop.
    Связь с локальным Python-сервером пайплайна (FastAPI, 127.0.0.1:8765). */
 (async function () {
   const { app } = require("uxp").shell;
@@ -55,7 +55,7 @@
         quality,
         embedColorProfile: false,
       });
-    }, { commandName: "Export for Double Chin Fix" });
+    }, { commandName: "Export for Chinminator" });
 
     const buf = await file.read({ format: constants.Format.binary });
     return new Uint8Array(buf);
@@ -113,7 +113,7 @@
     }
     // Вставляем результат новым слоем поверх активного (без destructive-правок)
     await core.executeAsModal(async () => {
-      const layer = await doc.layers.createLayer({ name: "DoubleChin Fixed" });
+      const layer = await doc.layers.createLayer({ name: "Chinminator Fixed" });
       await imaging.putPixelsIntoLayer({
         documentId: doc.id,
         layerId: layer._id,
@@ -124,7 +124,7 @@
           left: 0, top: 0, width: doc.width, height: doc.height,
           valueUnit: constants.UnitType.PIXELS } },
       });
-    }, { commandName: "Apply Double Chin Fix" });
+    }, { commandName: "Apply Chinminator" });
     log(`«${doc.title}»: применено (${backend})`);
     return true;
   }

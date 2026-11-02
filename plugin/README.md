@@ -1,4 +1,4 @@
-# Double Chin Fix — UXP-плагин Photoshop (Windows / macOS)
+# Chinminator — UXP-плагин Photoshop (Windows / macOS)
 
 Панель `Plugins → Development → Load` (или через UXP Developer Tool: `Plugin → Add Plugin → выбрать эту папку`).
 

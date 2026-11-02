@@ -25,7 +25,7 @@ from pipeline import process_image
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("app")
 
-app = FastAPI(title="Double Chin Corrector", version="1.0")
+app = FastAPI(title="Chinminator", version="1.0")
 # UXP websocket/fetch из Ps приходит с origin "psrp://" или localhost —
 # разрешаем всё на loopback-сервере (он слушает только 127.0.0.1).
 app.add_middleware(CORSMiddleware, allow_origins=["*"],

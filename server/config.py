@@ -1,4 +1,4 @@
-"""Конфигурация пайплайна Double Chin Corrector."""
+"""Конфигурация пайплайна Chinminator."""
 from dataclasses import dataclass
 
 

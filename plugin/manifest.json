@@ -1,9 +1,9 @@
 {
   "manifestVersion": 5,
-  "id": "com.example.doublechin-fix",
+  "id": "com.chinminator.app",
   "name": {
-    "code": "Double Chin Fix",
-    "en": "Double Chin Fix (Z-Image)"
+    "code": "Chinminator",
+    "en": "Chinminator (Z-Image)"
   },
   "version": "1.0.0",
   "main": "index.html",
@@ -15,8 +15,8 @@
     "startup": "./startup.js"
   },
   "panel": {
-    "id": "doublechin-panel",
-    "name": "Double Chin Fix",
+    "id": "chinminator-panel",
+    "name": "Chinminator",
     "type": "panel",
     "minWidth": 320,
     "minHeight": 480
