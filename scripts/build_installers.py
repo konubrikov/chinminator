@@ -4,6 +4,18 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'dist'
 OUT.mkdir(parents=True,exist_ok=True)
+def public_bytes(path):
+    data=path.read_bytes()
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"): return data
+    chunks=[data[:8]]; offset=8
+    while offset+12<=len(data):
+        length=int.from_bytes(data[offset:offset+4],"big")
+        kind=data[offset+4:offset+8]
+        if kind not in (b"iTXt",b"tEXt",b"zTXt",b"eXIf"):
+            chunks.append(data[offset:offset+length+12])
+        offset+=length+12
+    return b"".join(chunks)
+
 COMMON=[]
 for folder in ('plugin','scripts','server'):
     for p in (ROOT/folder).rglob('*'):
@@ -26,7 +38,7 @@ for platform in ('Windows','macOS-M4-24GB'):
     with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as z:
         for p in COMMON:
             name='Chinminator/'+('README.md' if p.name=='README-release.md' else p.relative_to(ROOT).as_posix())
-            z.writestr(name,p.read_bytes())
+            z.writestr(name,public_bytes(p))
         entries={}
         if platform=='Windows':
             entries={'Install.cmd':'@echo off\r\ncd /d "%~dp0"\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\\bootstrap_windows.ps1\r\nif errorlevel 1 echo Installation failed. See the error above.\r\npause\r\n',

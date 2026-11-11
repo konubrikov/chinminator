@@ -19,3 +19,13 @@ Chinminator.ccx
 com.chinminator.app_PS.ccx
 server/workflows/qwen21_installed.json
 server/models/selfie_multiclass_256x256.tflite
+
+# Local credentials and runtime diagnostics are never public source.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.log
+.huggingface/
+.cache/
