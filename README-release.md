@@ -78,3 +78,10 @@ JPEG + PSD означают две генерации на фото, с возм
 все 5 synthetic-фото, JPEG и PSD (10 GPU-проходов по 40 шагов). Размер 1254×1254,
 в PSD исходник и слой Chinminator Fixed; вне маски 0 изменённых пикселей.
 Отчёт: IMAGE-PROCESSOR-VALIDATION.json. На macOS этот запуск не проверялся.
+
+
+## Лицензия / License
+
+Apache License 2.0 + Commons Clause v1.0. Платная ретушь и внутреннее использование разрешены; продажа ПО/форков и платный доступ к их функциональности ограничены. [Полные условия](LICENSE) · [Пояснение RU/EN](LICENSE-FAQ.md). Сторонние модели лицензируются отдельно.
+
+Paid retouching and internal use are permitted. Selling the software/forks or paid access to their functionality is restricted. Source-available, not OSI open source. See LICENSE for the full terms.

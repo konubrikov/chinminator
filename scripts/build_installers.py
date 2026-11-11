@@ -33,6 +33,8 @@ with zipfile.ZipFile(ROOT/'Chinminator.ccx') as package:
         assert package.read(name)==(ROOT/'plugin'/name).read_bytes(), 'CCX is stale: '+name
 license=ROOT/'LICENSE'
 if license.exists():COMMON.append(license)
+for name in ('NOTICE','LICENSE-FAQ.md'):
+    if (ROOT/name).exists():COMMON.append(ROOT/name)
 for platform in ('Windows','macOS-M4-24GB'):
     target=OUT/f'Chinminator-{platform}.zip'
     with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED) as z:

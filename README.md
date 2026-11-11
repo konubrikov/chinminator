@@ -62,3 +62,10 @@ Generated source portraits. These are actual individual Chinminator runs, not a 
 ![FLUX 3: generated portrait before and after](docs/examples/flux-before-after.jpg)
 
 FLUX 3, 16 steps, 1.5× crop generation. Review contours, texture and color before using a result.
+
+
+## Лицензия / License
+
+Apache License 2.0 + Commons Clause v1.0. Платная ретушь и внутреннее использование разрешены; продажа ПО/форков и платный доступ к их функциональности ограничены. [Полные условия](LICENSE) · [Пояснение RU/EN](LICENSE-FAQ.md). Сторонние модели лицензируются отдельно.
+
+Paid retouching and internal use are permitted. Selling the software/forks or paid access to their functionality is restricted. Source-available, not OSI open source. See LICENSE for the full terms.
