@@ -47,3 +47,18 @@ Q4_K_M уменьшает вес основной модели примерно 
 вход модели 1280×1280 только за счёт полей, без ресайза; 0 изменённых пикселей вне маски.
 Тест с VAE на CPU занял около 305 секунд, включая первую загрузку. Q4 не заявляется быстрым режимом.
 MPS и 8 ГБ VRAM отдельно не проверены.
+
+
+## Примеры / Examples
+
+Исходные портреты сгенерированы. Это реальные результаты отдельных прогонов Chinminator, не гарантия одинакового результата на любой фотографии. Слева — исходник, справа — обработка. Метаданные изображений удалены.
+
+Generated source portraits. These are actual individual Chinminator runs, not a guarantee for every photo. Original on the left, processed result on the right. Image metadata has been removed.
+
+### Qwen-Image 2.1
+![Qwen: generated portrait before and after](docs/examples/qwen-before-after.png)
+
+### FLUX 3
+![FLUX 3: generated portrait before and after](docs/examples/flux-before-after.jpg)
+
+FLUX 3, 16 steps, 1.5× crop generation. Review contours, texture and color before using a result.
