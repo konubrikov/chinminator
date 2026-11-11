@@ -1,6 +1,6 @@
 # ============================================================================
 #  Chinminator — сборка PORTABLE-архива для Windows (.zip)
-#  Архив самодостаточен: переносите и запускаете на другой Win-машине с CUDA>=12ГБ.
+#  Архив самодостаточен: переносите и запускаете на другой Win-машине с CUDA>=16ГБ.
 #  Содержимое: server/ + plugin/ + scripts/ + .venv + vendor\ComfyUI + модели.
 #  Запуск:  powershell -ExecutionPolicy Bypass -File scripts\make_portable.ps1
 #           (-IncludeModels  — включить скачанные модели в архив; по умолчанию да,
@@ -51,8 +51,7 @@ if (Test-Path (Join-Path $Root "vendor\ComfyUI")) {
 
 if ($ExcludeModels) {
     foreach ($m in @(
-        (Join-Path $Inner "vendor\ComfyUI\models"),
-        (Join-Path $Inner "server\models\z-image-turbo-mlx"))) {
+        (Join-Path $Inner "vendor\ComfyUI\models"))) {
         if (Test-Path $m) { Remove-Item -Recurse -Force $m }
     }
     Write-Host "  модели ИСКЛЮЧЕНЫ из архива (-ExcludeModels)"

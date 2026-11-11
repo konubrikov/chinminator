@@ -1,144 +1,49 @@
-# Chinminator — плагин для Photoshop (Win/Mac) + сервер Z-Image Edit
+# Chinminator — Qwen-Image 2.1, FLUX 3, Lightning и Pruna
 
-Пайплайн:
+Локальная ретушь подбородка: MediaPipe → геометрия → auto/forced → Qwen-Image 2.1 → наложение только внутри маски. Фото не отправляются в облачный API.
 
-```
-Фото → [1. Детекция лица] → [2. Анализ геометрии] → [3. Принятие решения]
-     → [4. Редактирование области лица (Z-Image Edit, quality mode)] → Результат
-```
+## Установка Windows / macOS
 
-Два режима потока:
-* **auto**  — сплошной поток фотографий: решение «править или нет» принимает анализатор по метрикам.
-* **forced**— поток, где правка нужна точно: шаг 3 пропускает порог и всегда отправляет кадр в редактирование.
+Пошаговая инструкция Windows / Apple Silicon: [INSTALL-1.7.txt](INSTALL-1.7.txt).
+Windows: `powershell -ExecutionPolicy Bypass -File scripts/bootstrap_windows.ps1`.
+macOS: `bash scripts/bootstrap_macos.sh`.
 
-## Архитектура
+Меню запуска предлагает Qwen 2.1, FLUX 3, Lightning 4-step и Pruna 6-step v0.2. Qwen 2.1 предлагает Standard (автовыбор INT8/BF16 по памяти) или Q4_K_M GGUF. Lightning и Pruna используют базу Standard и скачивают адаптер с проверкой SHA256.
+Переключение после установки: Python из server/.venv запускает scripts/configure_models.py.
+В готовых ZIP Start устанавливает компоненты при первом запуске и запускает серверы. Панель устанавливается из CCX через Adobe. Есть также Stop, Test и Choose-model.
 
-```
-┌─────────────────────────── Photoshop (Win / macOS) ───────────────────────────┐
-│  UXP-плагин (plugin/)                                                          │
-│  • File > Automate / фильтр «Double Chin Fix…»                                 │
-│  • Open Image dialog → события selection / open                               │
-│  • Экспорт временного JPEG → HTTP POST на локальный сервер                     │
-└───────────────────────────────────────┬───────────────────────────────────────┘
-                                        │ localhost:8765 (HTTP JSON/multipart)
-┌───────────────────────────────────────▼───────────────────────────────────────┐
-│  server/ (Python 3.10+, Windows: CUDA ≥12 ГБ VRAM, macOS: Apple Silicon ≥24 ГБ)│
-│  pipeline.py — шаги 1–4                                                        │
-│   1. face_detect.py   — MediaPipe FaceMesh (468 точек)                         │
-│   2. geometry.py      — метрики подбородка/челюсти                             │
-│   3. decision.py      — эвристика решения (auto) / forced                      │
-│   4. edit_zimage.py   — диффузионное редактирование инpaint-области            │
-│  app.py               — FastAPI эндпоинты                                      │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
+API: http://127.0.0.1:8765/docs. ComfyUI: http://127.0.0.1:8188.
+`GET /health` возвращает qwen_backend и model; доступность HTTP сама по себе не подтверждает успешный рендер.
 
-## Быстрый старт (сервер)
+## Photoshop
 
-### Windows — скрипт подготовки окружения (рекомендуется)
+Добавьте plugin/manifest.json через UXP Developer Tools и загрузите плагин в Photoshop. Документ RGB, 8 бит/канал. Анализ не запускает генерацию. Применение создаёт новый слой; пакет обрабатывает открытые документы. Режим forced запускает правку при найденном лице, auto использует эвристики. Эти эвристики не являются гарантией обнаружения второго подбородка.
 
-Требования: Python 3.10+ (https://python.org), Git for Windows, NVIDIA GPU с CUDA и ≥12 ГБ VRAM.
+## CLI
 
 ```powershell
-# 1. Настройка окружения (venv + зависимости + PyTorch cu124 + ComfyUI + модели)
-powershell -ExecutionPolicy Bypass -File scripts\setup_windows.ps1
-#    флаги: -SkipModels (не качать Z-Image gguf)   -Force (пересоздать venv)
-
-# 2. Запуск сервера (поднимает ComfyUI на :8188 и Chinminator API на :8765)
-scripts\start_server.bat
-
-# 3. Пакетная обработка без Photoshop
-scripts\cli.bat C:\photos C:\photos_fixed --mode auto
+scripts/cli.bat input output --mode forced
+scripts/cli.bat input output --dry-run --report report.json
 ```
 
-### macOS — скрипт подготовки окружения
+Качественный режим: 40 шагов, CFG 1, Euler/simple. Qwen получает исходный кроп как reference image и редактирует его по инструкции. Маска ограничивает финальное наложение; за её пределами пиксели исходника сохраняются. Коррекция всегда максимальная внутри маски; её края плавно растушёваны. Маска включает шею и дополнительный радиус 3.5% высоты лица. Промпт редактируется и сохраняется в отдельном окне панели без пересборки. Workflow: server/workflows/qwen21_edit_quality.json.
 
-Требования: Apple Silicon (M1+), ≥24 ГБ unified RAM, Xcode CLT (`xcode-select --install`).
+Реальный API-рендер проверен на RTX 4070 Ti SUPER: 40 шагов, кроп 320×320, около 27 секунд. Пиксели вне маски не изменены. Проверена вставка результата новым слоем в Photoshop 27.8. Дополнительно проверен синтетический портрет с выраженным вторым подбородком: расширенная маска шеи, пользовательский промпт, около 50 секунд на GPU; 0 изменённых пикселей вне маски. Mac использует PyTorch MPS; реальная генерация на Mac ещё требует проверки.
 
-```bash
-bash scripts/setup_macos.sh      # venv + зависимости + MLX + модели (SKIP_MODELS=1 — без моделей)
-./scripts/start_server.sh        # Chinminator API на http://127.0.0.1:8765
-```
+Проверены реальным Qwen-бэкендом: /process PNG, /process RAW (512×512×3 байта) и CLI forced (edited=1, failed=0). Unit-тесты: `cd server; .venv/Scripts/python.exe -m unittest test_qwen -v`.
 
-### Portable-режим (Windows)
+Маска уточняется локальной моделью MediaPipe SelfieMulticlass: кожа лица и тела внутри области выбранной челюсти/шеи, без несвязанных участков кожи. Одежда, волосы и фон исключены из основы маски; небольшой запас и растушёвка наружу позволяют заменить исходный силуэт. Пиксели внешнего периметра рабочего кропа сохраняются из оригинала. Сегментация выполняется на CPU, генерация Qwen — на CUDA/GPU. Модель сегментации автоматически загружается при первом анализе в server/models, затем работает локально.
 
-Вся система лежит внутри папки проекта (`server\.venv`, `vendor\ComfyUI`, модели) —
-ничего не пишется в систему, папку можно переносить между машинами.
+Настоящий latent inpainting: исходный кроп кодируется через VAEEncode, маска передаётся через SetLatentNoiseMask в KSampler. Вне маски ComfyUI восстанавливает исходный latent на каждом шаге. Используется существующая Qwen-Image 2.1, без замены checkpoint на отдельную inpainting-модель. Кроп имеет контекстный запас 60% размера области с каждой стороны (ограничен краями фотографии); внешние 16 пикселей входа модели защищены от генерации. Финальное наложение сохраняет оригинальные пиксели вне маски, компенсируя погрешность VAE. Проверено на synthetic-04: 40 шагов, 49 секунд, 0 изменений вне маски; 11 контрактных тестов пройдены.
 
-```powershell
-# Собрать самодостаточный zip-архив (со включённым .venv, ComfyUI и моделями):
-powershell -ExecutionPolicy Bypass -File scripts\make_portable.ps1
-#    -ExcludeModels — лёгкий архив без гигабайтных моделей (скачаются при первом запуске setup)
+Область ретуши обрабатывается в исходном разрешении 1:1: без уменьшения и растягивания.
+Добавляются только технические поля до кратности 32 px, которые удаляются после генерации.
+Авто выбирает 28/40 шагов по размеру области; «Максимум деталей» задаёт 40 шагов.
+При нехватке памяти нет скрытого снижения разрешения. Для явного ограниченного режима API
+предусмотрен native_resolution=0 и max_side; панель всегда отправляет native_resolution=1.
+Q4_K_M уменьшает вес основной модели примерно до 4,19 ГБ, но не гарантирует ускорения.
 
-# На целевой машине: распакуйте в любую папку и запустите
-scripts\start_server.bat --portable
-```
-
-Ручной запуск плагина из portable-папки: Photoshop → Plug-ins & Automation → загрузить
-`plugin\manifest.json` через UXP Developer Tool; URL сервера оставить `http://127.0.0.1:8765`.
-
-<details>
-<summary>Ручная установка сервера (без скриптов)</summary>
-
-```bash
-cd server
-python -m venv .venv && source .venv/bin/activate   # Win: .venv\Scripts\activate
-pip install -r requirements.txt
-
-# Windows (CUDA):
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
-huggingface-cli download Tongzean/Z-Image-Turbo-ComfyUI --local-dir ../vendor/ComfyUI/models/diffusion_models
-
-# macOS (MLX, 24+ ГБ unified memory):
-pip install mlx mlx-lm
-huggingface-cli download Tongzean/Z-Image-Turbo-MLX --local-dir models/z-image-turbo-mlx
-
-uvicorn app:app --host 127.0.0.1 --port 8765
-```
-
-</details>
-
-Модель: **Tongzean/Z-Image-Turbo** (Apache-2.0). Режим `quality` = 8 шагов, CFG 2.0,
-полноразмерный латент (без downscaled pass); режим `fast` оставлен как заглушка —
-согласно ТЗ реализован только качественный.
-
----
-
-## Установка в Photoshop (плагин)
-
-1. Запустите сервер (`scripts\start_server.bat` или `./scripts/start_server.sh`).
-2. Установите **UXP Developer Tool** (https://github.com/Adobe-CEP/UXPTooling).
-3. В DevTool: Add Plugin → выберите `plugin/manifest.json` → Load.
-   Либо: Photoshop → Plugins → Development Plugins.
-4. Панель «Chinminator» появится в Window → Extensions. URL сервера настраивается в панели (по умолчанию http://127.0.0.1:8765).
-
-## Структура проекта
-
-```
-chinminator/
-├── server/            # Python-ядро: шаги 1–4, FastAPI, бэкенды Z-Image
-├── plugin/            # UXP-панель Photoshop v5 (Win/Mac)
-└── scripts/           # подготовка и запуск
-    ├── setup_windows.ps1    # установка окружения Windows (venv, torch cu124, ComfyUI, модели)
-    ├── setup_macos.sh       # установка окружения macOS (venv, MLX, модели)
-    ├── start_server.bat     # запуск сервера Win (+ComfyUI), флаг --portable
-    ├── start_server.sh      # запуск сервера macOS
-    ├── cli.bat              # пакетная обработка без Photoshop
-    └── make_portable.ps1    # сборка portable zip-архива для Windows
-```
-
-## Метрики анализа геометрии (шаг 2)
-
-| Метрика | Смысл | Порог default |
-|---|---|---|
-| `submental_ratio`    | выпуклость подподбородочной дуги относительно линии челюсть→подбородок | 0.12 |
-| `jaw_collar_gap`     | зазор между линией челюсти и «воротником» головы (низ кадра)          | 0.05 |
-| `neck_shadow_depth`  | глубина тени под подбородком (LAB L-канал)                              | 0.22 |
-
-Решение (auto): правим, если `submental_ratio` выше порога И подтверждается хотя бы
-одна из двух остальных метрик. Пороги настраиваются в UI плагина и в `config.py`.
-
-## Эндпоинты
-
-* `GET  /health` — статус, GPU/backend, модель
-* `POST /analyze` — шаги 1–3, возвращает метрики + bbox + mask-preview + вердикт
-* `POST /process` — полный пайплайн, возвращает PNG с результатом (side-by-side опционально)
+Проверка Q4_K_M на RTX 4070 Ti SUPER 16 ГБ: 28 шагов, исходная область 1254×1254,
+вход модели 1280×1280 только за счёт полей, без ресайза; 0 изменённых пикселей вне маски.
+Тест с VAE на CPU занял около 305 секунд, включая первую загрузку. Q4 не заявляется быстрым режимом.
+MPS и 8 ГБ VRAM отдельно не проверены.

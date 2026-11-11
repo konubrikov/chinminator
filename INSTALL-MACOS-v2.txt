@@ -1,0 +1,3 @@
+Chinminator 1.7
+
+Актуальная инструкция находится в START-HERE.txt / INSTALL-1.7.txt.

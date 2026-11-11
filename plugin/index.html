@@ -7,38 +7,43 @@
 </head>
 <body>
   <div class="container">
-    <h2>Chinminator <span class="tag">Z-Image · quality</span></h2>
+    <h2>Chinminator <span id="model-label" class="tag">Qwen-Image 2.1</span></h2>
 
     <div id="server-status" class="status">Проверка сервера…</div>
 
+    <div class="actions">
+      <button id="btn-analyze" class="secondary">Анализ</button>
+      <button id="btn-apply" class="primary">Запустить ретушь</button>
+    </div>
+
+    <div id="task-status" class="task-status">Откройте фото RGB, 8 бит/канал.</div>
+    <button id="btn-prompt" class="secondary prompt-button">Редактировать промпт…</button>
+    <div class="scroll-area">
     <section>
+      <button id="btn-image-processor" class="secondary">Для Обработчика изображений</button>
+      <button id="btn-record-action" class="secondary">Записать шаг в операцию</button>
+      <p class="quality-note">Включите запись в «Операциях», нажмите эту кнопку и остановите запись. Шаг запоминает промпт и настройки; обрабатывает текущий документ.</p>
       <h3>Режим потока</h3>
       <label class="radio">
-        <input type="radio" name="mode" value="auto" checked />
-        Авто — сплошной поток (решает анализатор)
+        <input type="radio" name="mode" value="auto" />
+        Авто — по результату анализа
       </label>
       <label class="radio">
-        <input type="radio" name="mode" value="forced" />
-        Принудительно — править каждое фото
+        <input type="radio" name="mode" value="forced" checked />
+        Обработать каждое фото
       </label>
     </section>
 
     <section>
+      <p id="quality-note" class="quality-note">Исходное разрешение области · автошаги по её размеру</p>
+      <label><input type="checkbox" id="max-detail" /> Максимум деталей (медленнее)</label>
       <h3>Чувствительность</h3>
-      <label>Порог подбородка <span id="v-thresh">0.12</span>
+      <label class="slider">Порог подбородка <span id="v-thresh">0.12</span>
         <input type="range" id="threshold" min="0.05" max="0.30" step="0.01" value="0.12" />
-      </label>
-      <label>Сила коррекции <span id="v-strength">0.55</span>
-        <input type="range" id="strength" min="0.30" max="0.75" step="0.05" value="0.55" />
       </label>
       <label><input type="checkbox" id="sidebyside" /> Результат рядом с оригиналом</label>
       <label><input type="checkbox" id="batch-open" /> Пакет: все открытые документы</label>
     </section>
-
-    <div class="actions">
-      <button id="btn-analyze" class="secondary">Предпросмотр анализа</button>
-      <button id="btn-apply" class="primary">Применить</button>
-    </div>
 
     <div id="preview-box" class="hidden">
       <h3>Анализ</h3>
@@ -47,7 +52,19 @@
     </div>
 
     <div id="log" class="log"></div>
+    </div>
   </div>
+  <dialog id="prompt-dialog">
+    <h2>Промпт ретуши</h2>
+    <p>Изменения применяются к следующему запуску и сохраняются между сеансами.</p>
+    <textarea id="prompt-text" aria-label="Промпт ретуши"></textarea>
+    <div id="prompt-error" class="prompt-error"></div>
+    <div class="actions">
+      <button id="prompt-reset" class="secondary">По умолчанию</button>
+      <button id="prompt-cancel" class="secondary">Отмена</button>
+      <button id="prompt-save" class="primary">Сохранить</button>
+    </div>
+  </dialog>
   <script src="main.js"></script>
 </body>
 </html>

@@ -1,0 +1,332 @@
+{
+  "version": "1.5.0",
+  "photoshop": "27.8",
+  "platform": "Windows/CUDA RTX 4070 Ti SUPER 16GB",
+  "entrypoint": "Adobe File > Scripts > Image Processor",
+  "action_set": "Chinminator Image Processor",
+  "action": "Retouch",
+  "formats": [
+    "JPEG quality 12",
+    "PSD with layers"
+  ],
+  "steps": 40,
+  "native_resolution": true,
+  "context_margin_ratio": 1.0,
+  "photos": [
+    {
+      "input": "synthetic-01.png",
+      "input_sha256": "b4a2f3923b32f04f5190cff1644d8c9b191c9f24c281e507470608276e897e93",
+      "shape": [
+        1254,
+        1254,
+        3
+      ],
+      "context_crop": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "jobs": [
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 50.234,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 374378,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "7cdd4643050c7cdc54489e47ec80b95fd5c159f0f7fc341afe9cfbe207a51a4f"
+        },
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 52.656,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 372696,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "fe2511cdda6ed4727f2d72a2dcaf8f83d759772676fadd19c19105d14b5b9a5d"
+        }
+      ],
+      "outputs": {
+        "jpg": {
+          "sha256": "b84ab58fe3bace3f9a13fa12fd5ec305e633ba578e9ff2cc12b930b95e1cbfcf",
+          "bytes": 984058,
+          "size": [
+            1254,
+            1254
+          ]
+        },
+        "psd": {
+          "sha256": "3168ebbd1d0b91c24231f64e8b79c1def8f7f27576b231421655128aa6ba5fb7",
+          "bytes": 14036329,
+          "size": [
+            1254,
+            1254
+          ]
+        }
+      }
+    },
+    {
+      "input": "synthetic-02.png",
+      "input_sha256": "9b1332fd30e06582093fc2a01bf0940f28b0b2a140efeaeb3b5529850ab7d392",
+      "shape": [
+        1254,
+        1254,
+        3
+      ],
+      "context_crop": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "jobs": [
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 53.641,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 321380,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "72e0ee1dc69858eb2d2b0a94a9953d35456a7e1975a74dee6ce07de2bf9fcc70"
+        },
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 46.219,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 320666,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "c3612b2eae0cac2903d8f6ebd596d2f53ac89308462b2826d652d14d362e8dd7"
+        }
+      ],
+      "outputs": {
+        "jpg": {
+          "sha256": "2b16ce9d68a537cee97308eada5fbb333a593887bc4cc3d3430b4dfd7f241589",
+          "bytes": 1050906,
+          "size": [
+            1254,
+            1254
+          ]
+        },
+        "psd": {
+          "sha256": "f9b57d47efe976a14f03d3840b7d4e2e80a1bb544f010d32ff420072400a0bda",
+          "bytes": 14003438,
+          "size": [
+            1254,
+            1254
+          ]
+        }
+      }
+    },
+    {
+      "input": "synthetic-03.png",
+      "input_sha256": "ab5fa3c48db409bfd96e2ef64c97f445d7cf5d1ab5da7f31c7a231189a8feda8",
+      "shape": [
+        1254,
+        1254,
+        3
+      ],
+      "context_crop": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "jobs": [
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 53.312,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 419759,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "26b27c1076e0e212acf908479b586cda3c82a9683a92be7090e841eb57ce1f88"
+        },
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 46.547,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 418907,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "c2ef82884b8e4ec9666e49558d2897dbc8d7d630327276c8ae9d6589dddfc274"
+        }
+      ],
+      "outputs": {
+        "jpg": {
+          "sha256": "da3bba7059329d770f5643e787d0aeab9247a6a48b6ffd820d593e2926bb5950",
+          "bytes": 998939,
+          "size": [
+            1254,
+            1254
+          ]
+        },
+        "psd": {
+          "sha256": "10d1625489e5bbd220aa90f75eda5fef98415e1b2ffa322037a7d6e0e25d0088",
+          "bytes": 14038647,
+          "size": [
+            1254,
+            1254
+          ]
+        }
+      }
+    },
+    {
+      "input": "synthetic-04.png",
+      "input_sha256": "9b12b1b458054d387f85e50093e8f7dcd4505a3bd1a67f1dc80567699b0f97d4",
+      "shape": [
+        1254,
+        1254,
+        3
+      ],
+      "context_crop": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "jobs": [
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 53.344,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 330084,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "d77bff3dfe4f15db339b028d131800ad463961995e6f958bcc8c92334a0f76fd"
+        },
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 46.578,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 330120,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "4ffd74de003d040db196e18ce6cbf500111ff938ebe836b1a87b2ec301a440c7"
+        }
+      ],
+      "outputs": {
+        "jpg": {
+          "sha256": "539e09289b65840e209f68779bdcc10ea6b2326da69e4ea764f73257524f7ff1",
+          "bytes": 960187,
+          "size": [
+            1254,
+            1254
+          ]
+        },
+        "psd": {
+          "sha256": "e4b2b7a0e5e6b1078bc06242aff5f0efe14245cccba1bef0a9eac378ed7d85a3",
+          "bytes": 13999359,
+          "size": [
+            1254,
+            1254
+          ]
+        }
+      }
+    },
+    {
+      "input": "synthetic-05.png",
+      "input_sha256": "aa6bff8359dd1b2a2bf22f747a0db4b481abee00f2a8db67b600e2a6186f6232",
+      "shape": [
+        1254,
+        1254,
+        3
+      ],
+      "context_crop": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "jobs": [
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 53.797,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 421988,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "0b732c9ed025f41a0e1b456f972810b4dc8734249db60fd0e9b8d6f8370cc838"
+        },
+        {
+          "edited": true,
+          "skipped_reason": "",
+          "seconds": 46.266,
+          "width": 1254,
+          "height": 1254,
+          "backend": "comfyui-qwen-image-2.1",
+          "changed_pixels": 421310,
+          "outside_mask_changed_pixels": 0,
+          "output_sha256": "3b2c9877d8b0a6833eba51b9ad451dd497453c713ae94d5360dc661fafd61cf1"
+        }
+      ],
+      "outputs": {
+        "jpg": {
+          "sha256": "45d07b6c60cbccdb3181b1ad2bb81108cf016d86ddb13e5fedb10f443129a2e3",
+          "bytes": 1259005,
+          "size": [
+            1254,
+            1254
+          ]
+        },
+        "psd": {
+          "sha256": "e51f81a424cce528256b0cba7b54583dfaa06becc17bc6f785b754272d86e25d",
+          "bytes": 14171036,
+          "size": [
+            1254,
+            1254
+          ]
+        }
+      }
+    }
+  ],
+  "passed": 5,
+  "total_gpu_jobs": 10,
+  "note": "Adobe Image Processor runs the Action independently for each selected output format; two formats cause two GPU renders per photo.",
+  "photoshop_layer_validation": [
+    {
+      "file": "synthetic-01.psd",
+      "layers": 2,
+      "top": "Chinminator Fixed"
+    },
+    {
+      "file": "synthetic-02.psd",
+      "layers": 2,
+      "top": "Chinminator Fixed"
+    },
+    {
+      "file": "synthetic-03.psd",
+      "layers": 2,
+      "top": "Chinminator Fixed"
+    },
+    {
+      "file": "synthetic-04.psd",
+      "layers": 2,
+      "top": "Chinminator Fixed"
+    },
+    {
+      "file": "synthetic-05.psd",
+      "layers": 2,
+      "top": "Chinminator Fixed"
+    }
+  ]
+}

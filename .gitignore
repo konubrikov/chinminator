@@ -8,3 +8,14 @@ vendor/
 .DS_Store
 Thumbs.db
 # face_landmarker.task (~3.6 МБ) намеренно в репозитории — нужен шагу 1 из коробки
+
+work/
+.bootstrap/
+.python/
+.uv-cache/
+hardware-profile.json
+.installed-version
+Chinminator.ccx
+com.chinminator.app_PS.ccx
+server/workflows/qwen21_installed.json
+server/models/selfie_multiclass_256x256.tflite

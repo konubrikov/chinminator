@@ -1,35 +1,81 @@
 {
   "manifestVersion": 5,
   "id": "com.chinminator.app",
-  "name": "Chinminator (Z-Image)",
-  "version": "1.1.0",
+  "name": "Chinminator",
+  "version": "1.7.0",
   "main": "index.html",
   "host": {
     "app": "PS",
-    "minVersion": "24.2.0"
+    "minVersion": "24.2.0",
+    "data": {
+      "apiVersion": 2,
+      "loadEvent": "startup"
+    }
   },
   "entrypoints": [
     {
       "type": "panel",
       "id": "chinminator-panel",
-      "label": { "default": "Chinminator" },
-      "minimumSize": { "width": 320, "height": 480 },
-      "preferredDockedSize": { "width": 320, "height": 640 },
-      "preferredFloatingSize": { "width": 340, "height": 680 },
+      "label": {
+        "default": "Chinminator"
+      },
+      "minimumSize": {
+        "width": 320,
+        "height": 480
+      },
+      "preferredDockedSize": {
+        "width": 320,
+        "height": 640
+      },
+      "preferredFloatingSize": {
+        "width": 340,
+        "height": 680
+      },
       "icons": [
-        { "width": 23, "height": 23, "path": "icons/icon.png", "scale": [1, 2],
-          "theme": ["all"], "species": ["generic"] }
+        {
+          "width": 23,
+          "height": 23,
+          "path": "icons/icon.png",
+          "scale": [
+            1,
+            2
+          ],
+          "theme": [
+            "all"
+          ],
+          "species": [
+            "generic"
+          ]
+        }
       ]
     }
   ],
   "requiredPermissions": {
     "network": {
-      "domains": ["http://127.0.0.1:8765", "http://localhost:8765"]
+      "domains": [
+        "http://127.0.0.1",
+        "http://localhost",
+        "http://127.0.0.1:8765",
+        "http://localhost:8765"
+      ]
     },
     "localFileSystem": "plugin"
   },
   "icons": [
-    { "width": 48, "height": 48, "path": "icons/icon.png", "scale": [1, 2],
-      "theme": ["all"], "species": ["pluginList"] }
+    {
+      "width": 48,
+      "height": 48,
+      "path": "icons/icon.png",
+      "scale": [
+        1,
+        2
+      ],
+      "theme": [
+        "all"
+      ],
+      "species": [
+        "pluginList"
+      ]
+    }
   ]
 }

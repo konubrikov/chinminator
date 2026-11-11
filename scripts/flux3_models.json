@@ -1,0 +1,54 @@
+{
+  "repo": "black-forest-labs/flux-3-image-klein-comfy",
+  "revision": "9d36114cf7a2e03a45c28f5cc4987d20ebfdb6c1",
+  "files": {
+    "diffusion_models/flux3-image-klein-base-bf16.safetensors": {
+      "size": 11076957072,
+      "sha256": "5c921759dc03663dbb67df11d8e3d317d2d5b893b31b969c95dc77ebf861b19c"
+    },
+    "diffusion_models/flux3-image-klein-base-int8-convrot.safetensors": {
+      "size": 5807427339,
+      "sha256": "8949ecfc1bf3871b08be02cf43ec7276a4914e1a86eade6b5eb8f4204426bc92"
+    },
+    "diffusion_models/flux3-image-klein-base-nvfp4.safetensors": {
+      "size": 5257238192,
+      "sha256": "f99714a57ada7b7f39ebb7d916a1b842324c8ec483943816f5b3ea5c062b08a9"
+    },
+    "diffusion_models/flux3-image-klein-bf16.safetensors": {
+      "size": 11097404512,
+      "sha256": "c3e9813cdd049c831c836b2e9db61150e49a93fc1a4c63b256494642fee0bd7c"
+    },
+    "diffusion_models/flux3-image-klein-int8-convrot.safetensors": {
+      "size": 5827874779,
+      "sha256": "847d8933548afd93df4af2cac2498e70891bf28d9dae06d695f536992e168fe2"
+    },
+    "diffusion_models/flux3-image-klein-nvfp4.safetensors": {
+      "size": 5277685632,
+      "sha256": "15d421e2558443fcf83ba46f3cd884d9d181c2c7a0a7bdcd2974af234a2d4f5c"
+    },
+    "text_encoders/qwen3.5_9b_flux3_prompt_upsampler_bf16.safetensors": {
+      "size": 18819722392,
+      "sha256": "f5062a1fba3e63afe5c88349a311903fec06c959b362f1247127e63d5c860ed4"
+    },
+    "text_encoders/qwen3.5_9b_flux3_prompt_upsampler_int8_convrot.safetensors": {
+      "size": 9748113996,
+      "sha256": "cb8cb9b9dcd2569509de755dca54d96fd93a16a7aabfd2f4051f0a144230620f"
+    },
+    "text_encoders/qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors": {
+      "size": 6724090780,
+      "sha256": "e5d85a7421d197bf5a12474511936ecabce19a833252f16e9310a983194a4458"
+    },
+    "text_encoders/qwen3vl_4b_bf16.safetensors": {
+      "size": 8875719408,
+      "sha256": "f0b24fc5c8d7c0ea6ca909da14c20af5cac53f22506be942c6c956f838b9630f"
+    },
+    "text_encoders/qwen3vl_4b_int8_convrot.safetensors": {
+      "size": 4858559240,
+      "sha256": "32de113cbf8282b02cbff0794b637b9d6676da09314a1db5a30bcea9bf4ee01c"
+    },
+    "vae/flux2-vae.safetensors": {
+      "size": 336211292,
+      "sha256": "868fe7b343cc8f3a19dbcfcafbc3d5f888802be3f89bd81b65b3621a066ce8f3"
+    }
+  }
+}

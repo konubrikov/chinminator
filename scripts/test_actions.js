@@ -1,0 +1,66 @@
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const fs = require('node:fs');
+const path = require('node:path');
+(async () => {
+  const elements = new Map();
+  const el = id => {
+    if (!elements.has(id)) elements.set(id, { value: id === 'threshold' ? '0.12' : '', checked: false, textContent: '', addEventListener(event, fn) { this[event] = fn; }, classList: {add(){},remove(){}} });
+    return elements.get(id);
+  };
+  let recorded, request, modalCalls=0, layers=0, releasePixels, fail=false, heartbeat;
+  let healthData = {capabilities:['auto_quality','native_resolution','raw_input','jsx_automation'],qwen_backend:'test'};
+  const document = {getElementById:el,querySelector:()=>({value:'forced'})};
+  const file = {read:async()=>new ArrayBuffer(4),delete:async()=>{}};
+  const storage = {getPluginFolder:async()=>({getEntry:async()=>({read:async()=>'Recorded prompt'})}),getDataFolder:async()=>({getEntries:async()=>[]}),getTemporaryFolder:async()=>({createFile:async()=>file})};
+  const makeDoc=id=>({id,title:'Test '+id,mode:'RGB',bitsPerChannel:8,saveAs:{png:async()=>{}},createPixelLayer:async()=>{layers++;return {id:layers};}});
+  const ps={app:{activeDocument:makeDoc(1)},constants:{DocumentMode:{RGB:'RGB'},BitsPerChannelType:{EIGHT:8}},core:{executeAsModal:async fn=>{modalCalls++;return fn();}},action:{batchPlay:async commands=>{
+    if(commands[0]._obj==='get')return [{documentID:2},{title:'Test 2'},{mode:{_value:'RGBColor'}},{depth:8}];
+    layers++;return [{layerID:layers}];
+  },recordAction:async(options,data)=>{recorded={options,data};}},imaging:{getPixels:async()=>({imageData:{width:2,height:2,getData:async()=>new Uint8Array(12),dispose(){}}}),createImageDataFromBuffer:async()=>({dispose(){}}),putPixels:()=>new Promise(resolve=>{releasePixels=resolve;})}};
+  const context=vm.createContext({require:name=>name==='photoshop'?ps:{storage:{localFileSystem:storage,formats:{binary:'binary'}}},document,console,FormData,Blob,Uint8Array,setInterval:fn=>{heartbeat=fn;},fetch:async(url,options)=>{
+    if(url.endsWith('/health'))return {ok:true,json:async()=>healthData};
+    if(url.endsWith('/automation/settings')){request={url,settings:JSON.parse(options.body)};return {ok:true};}
+    request={url,params:JSON.parse(options.body.get('params')),mode:options.body.get('mode')};
+    if(fail)return {ok:false,status:503,json:async()=>({detail:'GPU failed'})};
+    return {ok:true,headers:{get:key=>({'X-Pipeline-Edited':'1','X-Image-Width':'2','X-Image-Height':'2','X-Pipeline-Backend':'unit-test'}[key])},arrayBuffer:async()=>new ArrayBuffer(12)};
+  }});
+  context.window=context;
+  vm.runInContext(fs.readFileSync(path.join(__dirname,'../plugin/main.js'),'utf8'),context);
+  await el('btn-image-processor').click();
+  assert.equal(request.settings.mode,'forced');
+  assert.equal(request.settings.params.quality.native_resolution,1);
+  assert.equal(request.settings.params.prompt,'Recorded prompt');
+  await el('btn-record-action').click();
+  assert.equal(recorded.options.methodName,'chinminatorAction');
+  assert.equal(layers,0,'Recording must not run retouch');
+  el('threshold').value='0.3';el('max-detail').checked=true;el('batch-open').checked=true;el('sidebyside').checked=true;
+  Object.defineProperty(ps.app,'activeDocument',{get(){throw new Error('Synchronous document getter blocks batch playback');}});
+  let finished=false;
+  const playback=context.chinminatorAction({isCancelled:false},recorded.data).then(()=>{finished=true;});
+  for(let i=0;i<30&&!releasePixels;i++)await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(finished,false,'Action must wait until pixels have been applied');
+  assert.equal(modalCalls,0,'Playback uses the supplied modal context');
+  assert.equal(request.params.thresholds.submental_ratio,0.12);
+  assert.equal(request.params.prompt,'Recorded prompt');
+  assert.equal(request.params.quality.native_resolution,1);
+  assert.match(request.url,/sidebyside=0&format=raw/);
+  assert.equal(layers,1);
+  releasePixels();await playback;assert.equal(finished,true);
+  fail=true;
+  await assert.rejects(context.chinminatorAction({isCancelled:false},recorded.data),/GPU failed/);
+  assert.equal(layers,1,'Failed inference must not add a result layer');
+  assert.equal(el('btn-apply').disabled,false);
+  await assert.rejects(context.chinminatorAction({isCancelled:true},recorded.data),/отменена/);
+  fail=false;
+  healthData={...healthData,engine:'flux3',model:'FLUX 3 Image Klein',default_prompt:'FLUX prompt'};
+  await heartbeat();
+  await el('btn-image-processor').click();
+  assert.equal(request.settings.params.prompt,'FLUX prompt');
+  assert.equal(el('model-label').textContent,'FLUX 3 Image Klein');
+  healthData={...healthData,engine:'qwen2',model:'Qwen-Image 2.1',default_prompt:'Qwen prompt'};
+  await heartbeat();
+  await el('btn-image-processor').click();
+  assert.equal(request.settings.params.prompt,'Qwen prompt');
+  console.log('Actions contracts passed: snapshot, current document, await completion, errors, cancellation');
+})().catch(e=>{console.error(e);process.exitCode=1;});

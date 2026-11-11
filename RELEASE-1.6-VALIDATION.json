@@ -1,0 +1,62 @@
+{
+  "version": "1.6.0",
+  "platform_tested": "Windows NVIDIA RTX 4070 Ti SUPER 16GB",
+  "tests": {
+    "server_unit": 34,
+    "installer_profile_unit": 13,
+    "photoshop_actions_js": "passed including model/prompt switching",
+    "adobe_ccx_install": "UPIA installation successful; Photoshop 27.8 reports Enabled 1.6.0",
+    "mac_shell_syntax": "passed bash -n",
+    "windows_powershell_syntax": "passed",
+    "clean_machine_bootstrap": "not run end-to-end on a clean OS",
+    "macos_mps_inference": "not tested; Test.command required on target Mac"
+  },
+  "gpu_inference": [
+    {
+      "variant": "flux3-native",
+      "seconds": 24.60624920000555,
+      "backend": "comfyui-flux3-image-klein",
+      "shape": [
+        1254,
+        1254,
+        3
+      ],
+      "outside_changed": 0,
+      "matches_experiment": true
+    },
+    {
+      "variant": "flux3-detail",
+      "seconds": 60.433556399992085,
+      "backend": "comfyui-flux3-image-klein",
+      "shape": [
+        1254,
+        1254,
+        3
+      ],
+      "outside_changed": 0,
+      "matches_experiment": true
+    }
+  ],
+  "qwen_regression": {
+    "seconds": 76.51800559999538,
+    "backend": "comfyui-qwen-image-2.1",
+    "matches_baseline": true,
+    "outside_changed": 0
+  },
+  "archives": [
+    {
+      "archive": "Chinminator-macOS-M4-24GB.zip",
+      "bytes": 2269231,
+      "sha256": "f0a7ad9d30a3cfcab36b4b82334e599dd60085c69353adffea6160a550316ed1",
+      "files": 84,
+      "structure_valid": true
+    },
+    {
+      "archive": "Chinminator-Windows.zip",
+      "bytes": 2269175,
+      "sha256": "a6f0488f3b9285af9a8fe824a93a314425d42f0b8bb9406ad086d5a4f826644e",
+      "files": 84,
+      "structure_valid": true
+    }
+  ]
+}

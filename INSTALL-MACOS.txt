@@ -1,0 +1,28 @@
+Chinminator — macOS / Apple M4 Pro, 24 GB
+
+Статус: подготовлен установочный пакет, реальная генерация на Mac НЕ проверена.
+Проверка доступности MPS не гарантирует совместимость всех операций Qwen.
+
+Требования: нативный Apple Silicon Python 3.12 (python.org), Git/Apple Command Line Tools,
+macOS 14+, Photoshop 24.2+, Adobe UXP Developer Tool, интернет, минимум 45 ГБ свободного диска.
+Веса около 17.3 ГБ; во время сборки скачанных частей нужно дополнительное место.
+
+1. Распаковать архив в постоянную папку. Не запускать прямо из ZIP.
+2. Запустить Install.command. Если Finder не запускает файл, в Terminal выполнить:
+   cd /путь/к/Chinminator
+   bash scripts/setup_macos.sh
+3. Запустить Start.command (либо bash scripts/start_server.sh). Оставить окно открытым.
+4. В другом окне запустить Test.command. Проверить work/smoke-before-after.png.
+   При ошибке сохранить work/comfy.log и вывод Test.command. Это обязательная проверка на целевом Mac.
+5. В Adobe UXP Developer Tool добавить plugin/manifest.json, выбрать Photoshop, нажать Load.
+
+Mac-профиль: INT8 diffusion + INT8 text encoder, MPS для генерации, text encoder и VAE на CPU,
+KV cache отключён, lowvram, запас памяти 6 ГБ, рабочий кроп ограничен 768 px.
+На 24 ГБ возможны нехватка памяти и swap: Photoshop и другие приложения используют ту же память.
+Не выставляется неограниченный MPS watermark. Скорость Windows нельзя переносить на Mac.
+CHINMINATOR_MAX_SIDE позволяет изменить лимит после успешного теста; пример:
+CHINMINATOR_MAX_SIDE=1024 bash scripts/start_server.sh
+
+Автокачество определяется по кропу с контекстом, а не по размеру всей фотографии.
+Перезапуск сервера после обновления обязателен. Старый уже работающий API автоматически не заменяется.
+Пакет содержит исходники и установщик; Python, ComfyUI и модели скачиваются отдельно.

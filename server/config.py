@@ -14,9 +14,11 @@ class Thresholds:
 DEFAULT_THRESHOLDS = Thresholds()
 
 EDIT_PROMPT_QUALITY = (
+    "Rebuild the complete chin and adjoining neck as one anatomically natural contour, with no remaining double chin, old fold or duplicate jaw edge. Preserve the original light source direction, softness, white balance and contrast. Create physically plausible new shadows for the corrected anatomy; do not retain the old submental fold shadow. "
     "Remove the double chin and submental fat, slim and smooth the under-jaw area, "
     "define a single clean jawline and natural neck contour. Keep the person's identity, "
     "skin texture, lighting, pose, hair, clothing and background exactly unchanged."
+    " Keep the upper facial outline and all unedited facial features at exactly the same pixel coordinates as the input. Do not translate, rotate, scale, zoom, or reframe the image. Keep the pixels along the entire outer perimeter of the image crop unchanged and perfectly aligned with the input. Change only the lower jaw, under-chin area and neck; connect the corrected contour smoothly to the unchanged upper face without double edges, ghost outlines or seams."
 )
 
 NEGATIVE_PROMPT = (
@@ -27,12 +29,14 @@ NEGATIVE_PROMPT = (
 
 @dataclass
 class QualityParams:
-    """Параметры качественного режима Z-Image-Turbo (реализован единственный)."""
-    steps: int = 8
-    cfg: float = 2.0
-    denoise_strength: float = 0.55   # умеренный: сохраняет текстуру кожи
+    """Параметры качественного режима Qwen-Image 2.1 (реализован единственный)."""
+    auto_quality: int = 1          # 1: choose settings from the actual context crop
+    native_resolution: int = 1     # preserve crop pixels; pad to model grid only
+    steps: int = 28
+    cfg: float = 1.0
+    denoise_strength: float = 0.75   # legacy API field; correction is always maximum
     mask_blur_px: int = 12           # мягкая граница инpaint-зоны
-    max_side: int = 1536             # длинная сторона входного кадра
+    max_side: int = 1024             # used only with explicit native_resolution=0
     seed: int = -1                   # -1 → случайный
 
 

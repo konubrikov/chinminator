@@ -1,0 +1,15 @@
+{
+  "version": "1.7.0",
+  "serverContractTests": 34,
+  "profileTests": 13,
+  "actionsContracts": "passed",
+  "ccxMatchesSource": true,
+  "macInference": "not verified",
+  "cleanOSInstall": "not verified",
+  "realInferenceInThisPreparation": "not run",
+  "historySecretScan": {
+    "commits": 16,
+    "blobs": 219,
+    "findings": 0
+  }
+}

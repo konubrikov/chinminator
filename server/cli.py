@@ -48,7 +48,7 @@ def main() -> int:
                          "forced — править каждое фото")
     ap.add_argument("--sidebyside", action="store_true")
     ap.add_argument("--dry-run", action="store_true",
-                    help="только шаги 1–3, без Z-Image")
+                    help="только шаги 1–3, без Qwen-Image 2.1")
     ap.add_argument("--report", default=None, help="JSON-отчёт по потоку")
     args = ap.parse_args()
 
@@ -90,8 +90,7 @@ def main() -> int:
             edited += 1
             tag = f"EDIT sev={res.decision.get('severity')}"
         else:
-            if not inp.is_file():
-                save(out_file, img)          # в поток «как есть»
+            save(out_file, img)          # сохраняем исходник при пропуске
             skipped += 1
             tag = f"SKIP ({res.skipped_reason or 'no edit'})"
         print(f"[{i}/{len(files)}] {f.name}: {tag}  metrics={res.geometry}")
@@ -102,7 +101,7 @@ def main() -> int:
     if args.report:
         Path(args.report).write_text(json.dumps(report, ensure_ascii=False, indent=2))
     print(f"\nГотово: edited={edited} skipped={skipped} failed={failed}")
-    return 0
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

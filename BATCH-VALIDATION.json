@@ -1,0 +1,65 @@
+{
+  "test": "Photoshop File > Automate > Batch, native UI launch",
+  "photoshop": "27.8.0",
+  "action": "New / chinminator",
+  "steps": 40,
+  "native_resolution": true,
+  "passed": 5,
+  "results": [
+    {
+      "file": "synthetic-01.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "changed_pixels": 373736,
+      "outside_mask_changed_pixels": 0,
+      "input_sha256": "b4a2f3923b32f04f5190cff1644d8c9b191c9f24c281e507470608276e897e93",
+      "output_sha256": "91e1368800c813ae50e6e5adf51837169f3f00fe3be2085acde734c622c777cb"
+    },
+    {
+      "file": "synthetic-02.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "changed_pixels": 320909,
+      "outside_mask_changed_pixels": 0,
+      "input_sha256": "9b1332fd30e06582093fc2a01bf0940f28b0b2a140efeaeb3b5529850ab7d392",
+      "output_sha256": "9c3ca93474dc55d38761c596e6b779f44285b2d48e3cd4c0b9c7f02998666793"
+    },
+    {
+      "file": "synthetic-03.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "changed_pixels": 419399,
+      "outside_mask_changed_pixels": 0,
+      "input_sha256": "ab5fa3c48db409bfd96e2ef64c97f445d7cf5d1ab5da7f31c7a231189a8feda8",
+      "output_sha256": "a87a278d5987616a7c156416faea5a04643c9c47b5dc161f371f9935c033064e"
+    },
+    {
+      "file": "synthetic-04.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "changed_pixels": 329673,
+      "outside_mask_changed_pixels": 0,
+      "input_sha256": "9b12b1b458054d387f85e50093e8f7dcd4505a3bd1a67f1dc80567699b0f97d4",
+      "output_sha256": "e342f310ec86266adbff14a9935234c8191abb69cc0fa4f866ad2114d70f8c90"
+    },
+    {
+      "file": "synthetic-05.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "changed_pixels": 422174,
+      "outside_mask_changed_pixels": 0,
+      "input_sha256": "aa6bff8359dd1b2a2bf22f747a0db4b481abee00f2a8db67b600e2a6186f6232",
+      "output_sha256": "cad2d75a471bfa0ca39f72cc01711c99798027d8beed11df3a38904b2c7beb14"
+    }
+  ]
+}

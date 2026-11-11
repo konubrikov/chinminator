@@ -1,9 +1,4 @@
-"""Общий код для общения с локальным ComfyUI (HTTP API).
-
-Ожидается запущенный ComfyUI (по умолчанию http://127.0.0.1:8188) с
-установленными нодами Z-Image (workflow из Tongzean/Z-Image-Turbo-ComfyUI).
-Используется на Windows: RTX с >=12 ГБ VRAM, квант Q8 GGUF.
-"""
+"""HTTP transport for the local ComfyUI API."""
 from __future__ import annotations
 
 import json
@@ -11,6 +6,7 @@ import os
 import time
 import urllib.parse
 import urllib.request
+import urllib.error
 import uuid
 from io import BytesIO
 
@@ -36,11 +32,17 @@ def post_prompt(graph: dict) -> str:
         COMFY_URL + "/prompt",
         data=json.dumps({"prompt": graph, "client_id": cid}).encode(),
         headers={"Content-Type": "application/json"}, method="POST")
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read())["prompt_id"]
+    try:
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return json.loads(r.read())["prompt_id"]
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"ComfyUI rejected workflow (HTTP {e.code}): {detail}") from e
+    except (urllib.error.URLError, TimeoutError) as e:
+        raise RuntimeError(f"ComfyUI connection failed: {e}") from e
 
 
-def wait_done(prompt_id: str, timeout_s: int = 600) -> dict:
+def wait_done(prompt_id: str, timeout_s: int = 1800) -> dict:
     """Ждёт завершения промпта, возвращает history entry outputs."""
     t0 = time.time()
     while time.time() - t0 < timeout_s:
@@ -48,9 +50,13 @@ def wait_done(prompt_id: str, timeout_s: int = 600) -> dict:
                 f"{COMFY_URL}/history/{prompt_id}", timeout=10) as r:
             hist = json.loads(r.read())
         if prompt_id in hist:
-            return hist[prompt_id].get("outputs", {})
+            entry = hist[prompt_id]
+            status = entry.get("status", {})
+            if status.get("status_str") == "error":
+                raise RuntimeError("ComfyUI execution failed: " + json.dumps(status.get("messages", []), ensure_ascii=False))
+            return entry.get("outputs", {})
         time.sleep(0.5)
-    raise TimeoutError(f"ComfyUI: таймаут ожидания {prompt_id}")
+    raise RuntimeError(f"ComfyUI: таймаут ожидания {prompt_id}")
 
 
 def fetch_image(outputs: dict) -> np.ndarray:

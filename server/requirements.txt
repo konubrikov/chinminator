@@ -8,11 +8,7 @@ Pillow>=10.0
 fastapi>=0.111
 uvicorn[standard]>=0.30
 python-multipart>=0.0.9
+huggingface_hub>=0.30
+psutil>=6.0
 
-# Z-Image бэкенды — поставить ОДИН из (см. README):
-# Windows (CUDA >=12 ГБ VRAM): запустить ComfyUI + Tongzean/Z-Image-Turbo-ComfyUI (gguf Q8)
-#   pip install comfyui-frontend-package  (сам ComfyUI ставится отдельно)
-# macOS (Apple Silicon >=24 ГБ): MLX-порт
-#   pip install mlx mlx-lm  + huggingface hub загрузка Tongzean/Z-Image-Turbo-MLX
-# Опционально нативно:
-# torch>=2.6 ; diffusers>=0.36 ; transformers>=4.51 ; accelerate
+# Qwen-Image 2.1: ComfyUI and CUDA dependencies are installed by scripts/setup_windows.ps1.

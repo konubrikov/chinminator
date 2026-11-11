@@ -1,0 +1,24 @@
+{
+  "qwen-lightning": {
+    "label": "Qwen Lightning 4-step",
+    "file": "loras/qwen21-lightning-4.safetensors",
+    "repo": "lightx2v/Qwen-Image-2.1-Lightning",
+    "revision": "6b0a1176327c01522a44276c5da67331a025b6fc",
+    "remote": "pytorch_lora_weights.safetensors",
+    "size": 67144280,
+    "sha256": "53c69320d4163da51032f90275074028cb098556039c72b45f8dce9f0f9e34a3",
+    "sigmas": [1.0, 0.75, 0.5, 0.25],
+    "cache": false
+  },
+  "qwen-pruna": {
+    "label": "Qwen Pruna 6-step v0.2",
+    "file": "loras/qwen21-pruna-6-v02.safetensors",
+    "repo": "PrunaAI/P-Q-Image-2.1",
+    "revision": "b479282ea5ca0d17eb8b415bc09c1394dc29f6c5",
+    "remote": "p_q_image_2.1_6_steps_v0.2.safetensors",
+    "size": 688027008,
+    "sha256": "d10a0ab365df3829d460be9196f6a8a7d0e8f5498f5a3f25d924b8f9ee8c94bb",
+    "sigmas": [1.0, 0.925, 0.85, 0.625, 0.375, 0.125],
+    "cache": true
+  }
+}

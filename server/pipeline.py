@@ -1,4 +1,4 @@
-"""Оркестрация пайплайна: Фото → [1 Детекция] → [2 Анализ] → [3 Решение] → [4 Z-Image Edit].
+"""Оркестрация пайплайна: Фото → [1 Детекция] → [2 Анализ] → [3 Решение] → [4 Qwen-Image 2.1 Edit].
 
 Используется и как Python API (cli.py), и как ядро HTTP-сервера (app.py).
 """
@@ -14,7 +14,7 @@ import numpy as np
 
 from config import DEFAULT_THRESHOLDS, QUALITY, Thresholds
 from decision import Decision, decide
-from edit_zimage import EditResult, edit_quality
+from edit_qwen import EditResult, edit_quality
 from face_detect import detect_faces
 from geometry import Geometry, analyze
 
@@ -61,7 +61,7 @@ def process_image(bgr: np.ndarray, *, mode: str = "auto",
 
     mode: "auto" — сплошной поток (решает анализатор);
           "forced" — правка выполняется всегда.
-    analyze_only: только шаги 1–3, без Z-Image (превью / dry-run).
+    analyze_only: только шаги 1–3, без Qwen-Image 2.1 (превью / dry-run).
     with_preview: построить PNG-превью разметки (нужно только /analyze).
     """
     if mode not in ("auto", "forced"):
@@ -107,12 +107,11 @@ def process_image(bgr: np.ndarray, *, mode: str = "auto",
     if analyze_only:
         return base
 
-    # ---------- 4. Редактирование (Z-Image, только quality) ----------
+    # ---------- 4. Редактирование (Qwen-Image 2.1, только quality) ----------
     mask01 = geo.mask.astype(np.float32) / 255.0
     t0 = time.perf_counter()
     with _EDIT_LOCK:
         er: EditResult = edit_quality(bgr, mask01, q, prompt=prompt,
-                                      strength_scale=0.7 + 0.6 * dec.severity,
                                       region_bbox=geo.region_bbox)
     t.edit_ms = (time.perf_counter() - t0) * 1000
     base.edited = True

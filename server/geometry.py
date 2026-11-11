@@ -89,7 +89,9 @@ def analyze(bgr: np.ndarray, face: Face) -> Geometry:
     neck_shadow_depth = _shadow_depth(bgr, pts, fh)
 
     # ---------- маска зоны редактирования ----------
-    mask, region_bbox = build_mask(bgr_shape=(h, w), face=face,
+    from skin_segment import segment_skin
+    skin_labels = segment_skin(bgr)
+    mask, region_bbox = build_mask(bgr_shape=(h, w), face=face, skin_labels=skin_labels,
                                    submental_ratio=submental_ratio)
 
     dbg = {
@@ -104,43 +106,62 @@ def analyze(bgr: np.ndarray, face: Face) -> Geometry:
 
 
 def build_mask(bgr_shape: tuple[int, int], face: Face,
-               submental_ratio: float = 0.0) -> tuple[np.ndarray, tuple[int, int, int, int]]:
-    """Инpaint-маска: подподбородочная зона + часть шеи.
+               submental_ratio: float = 0.0, skin_labels: np.ndarray | None = None) -> tuple[np.ndarray, tuple[int, int, int, int]]:
+    """Jaw and neck mask with a small scale-relative margin and soft edge.
 
-    Форма — «полумесяц» между дугой контура лица и областью ниже,
-    расширяется пропорционально силе второго подбородка. Верхняя граница —
-    линия jaw_l→chin→jaw_r (с небольшим подъёмом), нижняя — на 0.75*fh ниже
-    подбородка. Лицо ВЫШЕ линии челюсти не затрагивается.
+    Build in head-aligned coordinates so tilted portraits keep neck coverage.
+    The opaque core extends 0.85 face heights below the chin. A 3.5% radius
+    adds context around segmented skin; an outward feather smooths the transition.
     """
     h, w = bgr_shape
-    pts = face.landmarks
     fh = face.face_h
-    jaw_l, jaw_r, chin = pts[IDX_JAW_LEFT], pts[IDX_JAW_RIGHT], pts[IDX_CHIN]
-
-    ext = 1.0 + min(max(submental_ratio, 0.0), 0.35) * 1.5  # сильнее ЧП → шире зона
-    top_lift = 0.04 * fh
-
-    # Полигон: верхняя граница по дуге челюсти (чуть выше),
-    # нижняя — горизонтальная линия ниже подбородка.
-    arc = pts[SUBMENTAL_ARC]
-    upper = [(int(p[0]), int(p[1] - top_lift)) for p in arc]
-    y_bot = int(min(h - 1, chin[1] + 0.75 * fh * ext))
-    x_lo = int(max(0, min(p[0] for p in upper) - 0.08 * fh))
-    x_hi = int(min(w - 1, max(p[0] for p in upper) + 0.08 * fh))
-
-    poly = np.array(upper + [(x_hi, y_bot), (x_lo, y_bot)], dtype=np.int32)
+    chin = face.landmarks[IDX_CHIN]
+    align = _rotator(-face.roll_deg, center=chin)
+    restore = _rotator(face.roll_deg, center=chin)
+    arc = align(face.landmarks[SUBMENTAL_ARC])
+    ext = 1.0 + min(max(submental_ratio, 0.0), 0.35) * 1.5
+    upper = arc.copy()
+    # Raise and widen the sides to include lower cheeks and lower ear skin,
+    # keeping the centre below the mouth. Work in head-aligned coordinates.
+    side = np.linspace(-1.0, 1.0, len(upper))
+    upper[:, 1] -= (0.04 + 0.20 * np.abs(side) ** 1.5) * fh
+    upper[:, 0] += 0.16 * fh * side ** 3
+    y_bot = chin[1] + 0.85 * fh * ext
+    x_lo, x_hi = arc[:, 0].min() - 0.10 * fh, arc[:, 0].max() + 0.10 * fh
+    poly = restore(np.vstack([upper, [x_hi, y_bot], [x_lo, y_bot]]))
     mask = np.zeros((h, w), np.uint8)
-    cv2.fillPoly(mask, [poly], 255)
-
-    # Мягкое перо по границам, чтобы диффузия плавноBlend-ила результат
-    blur = max(5, int(0.06 * fh)) | 1
-    mask = cv2.GaussianBlur(mask, (blur, blur), 0)
-
-    ys, xs = np.where(mask > 8)
-    if len(xs) == 0:
-        return mask, (x_lo, int(chin[1]), x_hi, y_bot)
-    bbox = (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max()))
-    return mask, bbox
+    cv2.fillPoly(mask, [np.rint(poly).astype(np.int32)], 255)
+    if skin_labels is not None:
+        # Geometry limits the edit to the selected jaw/neck, semantic labels
+        # remove clothing, hair and background from the opaque skin core.
+        skin = np.isin(skin_labels, (2, 3)).astype(np.uint8)
+        close_radius = max(1, round(0.008 * fh))
+        skin = cv2.morphologyEx(skin, cv2.MORPH_CLOSE,
+            cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2*close_radius+1,)*2))
+        mask = ((mask > 0) & (skin > 0)).astype(np.uint8) * 255
+        count, components, stats, _ = cv2.connectedComponentsWithStats(mask)
+        # Keep the region nearest the chin, not disconnected hands or other people.
+        seed = np.zeros_like(mask)
+        cv2.circle(seed, tuple(np.rint(chin).astype(int)), max(3, round(0.18*fh)), 255, -1)
+        candidates = np.unique(components[(seed > 0) & (mask > 0)])
+        if not len(candidates):
+            raise RuntimeError("Кожа подбородка и шеи не найдена; проверьте фото через Анализ")
+        chosen = max(candidates, key=lambda i: stats[i, cv2.CC_STAT_AREA])
+        mask = (components == chosen).astype(np.uint8) * 255
+    radius = max(2, round(0.035 * fh))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * radius + 1,) * 2)
+    mask = cv2.dilate(mask, kernel)
+    # Feather outward only: the original skin silhouette stays fully opaque,
+    # so an old contour cannot leak through a half-transparent skin edge.
+    distance = cv2.distanceTransform(255-mask, cv2.DIST_L2, 5)
+    feather = max(2.0, 0.06 * fh)
+    t = np.clip(distance / feather, 0, 1)
+    alpha = 1 - t*t*(3-2*t)
+    mask = np.rint(alpha * 255).astype(np.uint8)
+    ys, xs = np.where(mask > 0)
+    if not len(xs):
+        return mask, (0, 0, w - 1, h - 1)
+    return mask, (int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max()))
 
 
 # ---------------------------------------------------------------- helpers

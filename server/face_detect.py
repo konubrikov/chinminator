@@ -77,6 +77,24 @@ def detect_faces(bgr: np.ndarray) -> list[Face]:
     """Возвращает список лиц (по убыванию размера). Пусто — если лиц нет."""
     h, w = bgr.shape[:2]
     pts_list = _detect_landmarks(bgr)
+    if not pts_list:
+        # Full-body portraits can place the face below the detector's internal
+        # scale. Retry overlapping native tiles; map every landmark back into
+        # the original frame. Retouch pixels are never resized by this search.
+        side=max(256,min(w,h)//2)
+        side=min(side,w,h)
+        def starts(length):
+            values=list(range(0,max(1,length-side+1),max(1,side//2)))
+            return sorted(set(values+[max(0,length-side)]))
+        for y in starts(h):
+            for x in starts(w):
+                for pts in _detect_landmarks(bgr[y:y+side,x:x+side]):
+                    # A clipped face from a tile edge must not become the mask.
+                    if np.any(pts.min(axis=0)<0.01*side) or np.any(pts.max(axis=0)>0.99*side):
+                        continue
+                    mapped=pts+np.array([x,y],dtype=np.float32)
+                    if not any(np.linalg.norm(mapped[IDX_CHIN]-old[IDX_CHIN])<0.15*side for old in pts_list):
+                        pts_list.append(mapped)
     faces = [_make_face(pts, (w, h)) for pts in pts_list]
     faces.sort(key=lambda f: f.face_h, reverse=True)
     return faces
